@@ -1,5 +1,6 @@
 -- Migration: Initial schema creation
 -- Created: 2025-01-01
+-- Updated: 2025-05-30
 -- Description: Create all tables and initial structure
 
 -- Create extensions
@@ -35,8 +36,30 @@ BEGIN
 END;
 $$ language 'plpgsql';
 
+-- Create partners table FIRST (так как на него ссылается users)
+-- Created: 2025-01-01
+CREATE TABLE IF NOT EXISTS partners (
+    id SERIAL PRIMARY KEY,
+    partner_name VARCHAR(255) NOT NULL,
+    description TEXT,
+    logo_url TEXT,
+    details TEXT,
+    website VARCHAR(500),
+    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
+);
+
+-- Create partners update trigger
+-- Created: 2025-01-01
+DROP TRIGGER IF EXISTS update_partners_updated_at ON partners;
+CREATE TRIGGER update_partners_updated_at
+    BEFORE UPDATE ON partners
+    FOR EACH ROW
+    EXECUTE FUNCTION update_updated_at_column();
+
 -- Create users table
 -- Created: 2025-01-01
+-- Updated: 2025-05-30 (добавлен referrer_partner_id с внешним ключом)
 CREATE TABLE IF NOT EXISTS users (
     id SERIAL PRIMARY KEY,
     full_name VARCHAR(255),
@@ -49,42 +72,25 @@ CREATE TABLE IF NOT EXISTS users (
     role user_role NOT NULL DEFAULT 'user',
     user_code VARCHAR(50) NOT NULL UNIQUE,
     telegram_id BIGINT UNIQUE,
+    referrer_partner_id INTEGER REFERENCES partners(id) ON DELETE SET NULL,
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
 
 -- Create indexes for users
 -- Created: 2025-01-01
+-- Updated: 2025-05-30 (добавлен индекс для referrer_partner_id)
 CREATE INDEX IF NOT EXISTS idx_users_phone ON users(phone);
 CREATE INDEX IF NOT EXISTS idx_users_user_code ON users(user_code);
 CREATE INDEX IF NOT EXISTS idx_users_telegram_id ON users(telegram_id);
 CREATE INDEX IF NOT EXISTS idx_users_username ON users(username);
+CREATE INDEX IF NOT EXISTS idx_users_referrer_partner_id ON users(referrer_partner_id);
+
 -- Create users update trigger
 -- Created: 2025-01-01
 DROP TRIGGER IF EXISTS update_users_updated_at ON users;
 CREATE TRIGGER update_users_updated_at
     BEFORE UPDATE ON users
-    FOR EACH ROW
-    EXECUTE FUNCTION update_updated_at_column();
-
--- Create partners table
--- Created: 2025-01-01
-CREATE TABLE IF NOT EXISTS partners (
-    id SERIAL PRIMARY KEY,
-    partner_name VARCHAR(255) NOT NULL,
-    description TEXT,
-    logo_url VARCHAR(500),
-    details TEXT,
-    website VARCHAR(500),
-    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
-);
-
--- Create partners update trigger
--- Created: 2025-01-01
-DROP TRIGGER IF EXISTS update_partners_updated_at ON partners;
-CREATE TRIGGER update_partners_updated_at
-    BEFORE UPDATE ON partners
     FOR EACH ROW
     EXECUTE FUNCTION update_updated_at_column();
 
@@ -144,10 +150,11 @@ CREATE TRIGGER update_partner_offers_updated_at
 
 -- Create transactions table
 -- Created: 2025-01-01
+-- Fixed: 2025-05-30 (исправлен тип данных для sender_id и recipient_id)
 CREATE TABLE IF NOT EXISTS transactions (
     id SERIAL PRIMARY KEY,
-    sender_id VARCHAR(50) NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    recipient_id VARCHAR(50) NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    sender_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    recipient_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     action_type action_type NOT NULL,
     amount INTEGER NOT NULL,
     date TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),

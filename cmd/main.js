@@ -52,7 +52,11 @@ async function startApplication() {
 
         const userRoutes = userRestService.getRoutes();
         userRoutes.forEach(route => {
-            app[route.method.toLowerCase()](route.path, route.handler);
+            if (route.middleware) {
+                app[route.method.toLowerCase()](route.path, route.middleware, route.handler);
+            } else {
+                app[route.method.toLowerCase()](route.path, route.handler);
+            }
         });
 
         app.post('/webhook/telegram', (req, res) => {

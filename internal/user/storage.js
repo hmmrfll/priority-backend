@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const User = require('./model');
+const generateUserCode = require('../shared/utils/generateUserCode');
 
 class UserStorage {
     constructor(db, logger) {
@@ -35,6 +36,45 @@ class UserStorage {
             return User.fromDatabase(result.rows[0]);
         } catch (error) {
             this.logger.error('Error getting user by id', error);
+            throw error;
+        } finally {
+            await client.end();
+        }
+    }
+
+    async getUserByCode(userCode) {
+        const client = this.db.getClient();
+        try {
+            await client.connect();
+            const result = await client.query(this.queries.getUserByCode, [userCode]);
+            return User.fromDatabase(result.rows[0]);
+        } catch (error) {
+            this.logger.error('Error getting user by code', error);
+            throw error;
+        } finally {
+            await client.end();
+        }
+    }
+
+    async createUser(userData) {
+        const client = this.db.getClient();
+        try {
+            await client.connect();
+
+            const userCode = userData.userCode || generateUserCode(userData.telegramId || userData.id);
+
+            const result = await client.query(this.queries.createUser, [
+                userData.fullName || null,
+                userData.username || null,
+                userData.avatarUrl || null,
+                userData.dateBirth || null,
+                userData.phone || null,
+                userData.company || null,
+                userCode
+            ]);
+            return User.fromDatabase(result.rows[0]);
+        } catch (error) {
+            this.logger.error('Error creating user', error);
             throw error;
         } finally {
             await client.end();

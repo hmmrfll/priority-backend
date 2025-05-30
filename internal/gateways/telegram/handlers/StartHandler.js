@@ -1,4 +1,4 @@
-const crypto = require('crypto');
+const generateUserCode = require('../../../shared/utils/generateUserCode');
 
 class StartHandler {
     constructor(bot, config, logger, db) {
@@ -98,7 +98,7 @@ class StartHandler {
                     return user;
                 }
             } else {
-                const userCode = this.generateUserCode(telegramUser.id);
+                const userCode = generateUserCode(telegramUser.id);
 
                 const insertFields = ['telegram_id', 'user_code'];
                 const insertValues = [telegramUser.id, userCode];
@@ -174,18 +174,6 @@ class StartHandler {
         }
 
         return parts.length > 0 ? parts.join(' ') : null;
-    }
-
-    generateUserCode(telegramId) {
-        const prefix = 'prtmtn_';
-        const hash = crypto.createHash('sha256').update(telegramId.toString()).digest('hex');
-        const hashPart = hash.substring(0, 8);
-        const timestamp = Date.now();
-        const hashNumber = parseInt(hashPart, 16);
-        const timeBasedNumber = hashNumber % timestamp;
-        const finalNumber = Math.abs(timeBasedNumber) % 1000000;
-        const paddedNumber = finalNumber.toString().padStart(6, '0');
-        return `${prefix}${paddedNumber}`;
     }
 }
 
