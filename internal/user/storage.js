@@ -70,11 +70,41 @@ class UserStorage {
                 userData.dateBirth || null,
                 userData.phone || null,
                 userData.company || null,
-                userCode
+                userCode,
+                userData.referrerPartnerId || null
             ]);
             return User.fromDatabase(result.rows[0]);
         } catch (error) {
             this.logger.error('Error creating user', error);
+            throw error;
+        } finally {
+            await client.end();
+        }
+    }
+
+    async updateUser(id, userData) {
+        const client = this.db.getClient();
+        try {
+            await client.connect();
+
+            const result = await client.query(this.queries.updateUser, [
+                id,
+                userData.fullName || null,
+                userData.username || null,
+                userData.avatarUrl || null,
+                userData.dateBirth || null,
+                userData.phone || null,
+                userData.company || null,
+                userData.referrerPartnerId || null
+            ]);
+
+            if (result.rows.length === 0) {
+                return null;
+            }
+
+            return User.fromDatabase(result.rows[0]);
+        } catch (error) {
+            this.logger.error('Error updating user', error);
             throw error;
         } finally {
             await client.end();

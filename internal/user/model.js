@@ -11,6 +11,7 @@ class User {
         this.role = data.role || 'user';
         this.userCode = data.user_code || data.userCode;
         this.telegramId = data.telegram_id || data.telegramId;
+        this.referrerPartnerId = data.referrer_partner_id || data.referrerPartnerId;
         this.createdAt = data.created_at || data.createdAt;
         this.updatedAt = data.updated_at || data.updatedAt;
     }
@@ -25,7 +26,8 @@ class User {
             bonusCount: this.bonusCount,
             company: this.company,
             role: this.role,
-            userCode: this.userCode
+            userCode: this.userCode,
+            referrerPartnerId: this.referrerPartnerId
         };
     }
 

@@ -1,4 +1,4 @@
-class Transaction {
+class AdminTransaction {
     constructor(data) {
         this.id = data.id;
         this.senderId = data.sender_id || data.senderId;
@@ -7,8 +7,8 @@ class Transaction {
         this.amount = data.amount;
         this.date = data.date;
         this.description = data.description;
-        this.partnerName = data.partner_name || data.partnerName;
-        this.partnerLogo = data.partner_logo || data.partnerLogo;
+        this.userName = data.user_name || data.userName;
+        this.adminName = data.admin_name || data.adminName;
         this.createdAt = data.created_at || data.createdAt;
         this.updatedAt = data.updated_at || data.updatedAt;
     }
@@ -16,19 +16,18 @@ class Transaction {
     toJSON() {
         return {
             id: this.id,
-            partnerName: this.partnerName,
-            bonusName: this.description,
-            amount: this.amount,
+            userName: this.userName,
+            adminName: this.adminName,
             actionType: this.actionType,
-            date: this.date,
-            imgPath: this.partnerLogo
+            amount: this.amount,
+            date: this.date
         };
     }
 
     static fromDatabase(dbTransaction) {
         if (!dbTransaction) return null;
-        return new Transaction(dbTransaction);
+        return new AdminTransaction(dbTransaction);
     }
 }
 
-module.exports = Transaction;
+module.exports = AdminTransaction;

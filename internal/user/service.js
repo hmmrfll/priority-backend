@@ -60,6 +60,35 @@ class UserService {
         const user = await this.storage.createUser(userData);
         return user.toJSON();
     }
+
+    async updateUser(id, userData) {
+        if (!id) {
+            throw new Error('User ID is required');
+        }
+
+        if (userData.phone && !ValidationUtils.isValidPhone(userData.phone)) {
+            throw new Error('Invalid phone format');
+        }
+
+        if (userData.dateBirth && !ValidationUtils.isValidDate(userData.dateBirth)) {
+            throw new Error('Invalid date format');
+        }
+
+        if (userData.referrerPartnerId && !ValidationUtils.isValidPartnerId(userData.referrerPartnerId)) {
+            throw new Error('Invalid partner ID');
+        }
+
+        if (userData.avatarUrl && !ValidationUtils.isValidUrl(userData.avatarUrl)) {
+            throw new Error('Invalid avatar URL format');
+        }
+
+        const user = await this.storage.updateUser(id, userData);
+        if (!user) {
+            throw new Error('User not found');
+        }
+
+        return user.toJSON();
+    }
 }
 
 module.exports = UserService;
