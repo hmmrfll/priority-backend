@@ -3,9 +3,11 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "dev": "nodemon _",
-    "start": "node _",
-    "migrate": "npx sequelize-cli db:migrate"
+    "dev": "nodemon cmd/main.js",
+    "start": "node cmd/main.js",
+    "migrate": "npx sequelize-cli db:migrate",
+    "migrate:undo": "npx sequelize-cli db:migrate:undo",
+    "seed": "npx sequelize-cli db:seed:all"
   },
   "keywords": [],
   "author": "",
@@ -17,6 +19,7 @@
     "dotenv": "^16.5.0",
     "express": "^5.1.0",
     "express-rate-limit": "^7.5.0",
+    "js-yaml": "^4.1.0",
     "node-cron": "^4.0.7",
     "node-telegram-bot-api": "^0.66.0",
     "nodemon": "^3.1.10",
