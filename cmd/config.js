@@ -1,7 +1,6 @@
 require('dotenv').config();
 
 const config = {
-  // Database
   database: {
     host: process.env.PG_HOST || 'localhost',
     port: process.env.PG_PORT || 5432,
@@ -12,19 +11,17 @@ const config = {
     logging: process.env.NODE_ENV === 'development' ? console.log : false
   },
 
-  // Server
   server: {
     port: process.env.BACKEND_PORT || 3000,
     host: process.env.BACKEND_HOST || 'localhost'
   },
 
-  // Telegram
   telegram: {
     botToken: process.env.BOT_TOKEN,
     miniAppUrl: process.env.MINI_APP_URL,
     webhookUrl: process.env.SERVER_URL ? `${process.env.SERVER_URL}/webhook/telegram` : null
   },
-  // Validation
+
   validate() {
     const errors = [];
 
