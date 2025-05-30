@@ -1,6 +1,7 @@
 class UserRestService {
-    constructor(userService, logger) {
+    constructor(userService, authMiddleware, logger) {
         this.userService = userService;
+        this.authMiddleware = authMiddleware;
         this.logger = logger;
     }
 
@@ -21,10 +22,11 @@ class UserRestService {
         }
     }
 
-
     getRoutes() {
+        const auth = this.authMiddleware.validateTelegramAuth();
+
         return [
-            { method: 'GET', path: '/user/:id', handler: this.getUser.bind(this) },
+            { method: 'GET', path: '/user/:id', handler: this.getUser.bind(this), middleware: auth },
         ];
     }
 }
